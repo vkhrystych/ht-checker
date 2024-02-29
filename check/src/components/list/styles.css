@@ -1,0 +1,41 @@
+.List {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-top: 0.2rem;
+  background-color: #ffffff;
+  max-height: 33.3vh;
+  overflow-y: auto;
+  border: 1px solid #cccccc;
+  border-radius: 0.4rem;
+  box-shadow: 0.4rem 0.4rem 1rem 0 rgba(204, 204, 204, 0.5);
+}
+
+.List-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.List-item {
+  padding: 1rem;
+}
+
+.List-item::first-letter {
+  text-transform: capitalize;
+}
+
+.List-item:hover,
+.List-item:focus {
+  background-color: #bfdbfb;
+}
+
+.List-no-results {
+  padding: 1rem;
+  text-align: center;
+  color: #909090;
+}
+
+.HighlightedText-highlight {
+  font-weight: bold;
+}
