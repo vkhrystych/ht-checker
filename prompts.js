@@ -10,10 +10,14 @@ export const sendFilesStructureToAIAndAskReturnOnlyRelated = async () => {
     I have an AutoComplete component written in React.
     I will send you a structure of files and folders of this project.
     We need to check only .ts and .tsx files.
+
+    Please also try to find the file that called "questions" or something like this.
+
     Please select files related to the component (and also utils, hooks and things related to api) and send me the answer in JSON format:
 
     {
-        neededFiles: [] // Array of file paths
+        neededFiles: [] // Array of file paths,
+        questions: "" // Path to the questions file
     }
 
     The structure of the project is below:
@@ -33,7 +37,7 @@ export const sendFilesStructureToAIAndAskReturnOnlyRelated = async () => {
     completion.choices[0].message.content
   );
 
-  return answerWithNeededFiles.neededFiles;
+  return answerWithNeededFiles;
 };
 
 export const sendRelatedFilesContentToAIAndAskToAnalyzeHometask = async (
@@ -41,39 +45,50 @@ export const sendRelatedFilesContentToAIAndAskToAnalyzeHometask = async (
 ) => {
   let filesContent = "";
 
-  for (const filePath of neededFilesPaths) {
+  for (const filePath of neededFilesPaths.neededFiles) {
     const fullPath = `./check/${filePath}`;
-    const fileContent = await readFileContent(fullPath);
-    const fileName = fullPath.split("/").pop();
+    let fileContent;
 
-    filesContent += `
-          ${fileName}
-          ${fileContent}
-        `;
+    try {
+      fileContent = await readFileContent(fullPath);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      if (fileContent) {
+        const fileName = fullPath.split("/").pop();
+        filesContent += `
+                  ${fileName}
+                  ${fileContent}
+                `;
+      }
+    }
   }
+
+  const questionsFileContent = await readFileContent(
+    `./check/${neededFilesPaths.questions}`
+  );
 
   const message = `
     We are checking the hometask for the front-end developer position. 
-    The goal is to write an Autocomplete component with following features:
+    The goal of the hometask is to write an Autocomplete component with following features:
+    - The auto-complete component is controlled (You can pass the value and onChange handler as a props to the main component)
+    - Component has loader (component has a loader when the API request is in progress)
+    - Debounce is implemented (component doesn't send a request on every key press, but only after the user stopped typing for a certain amount of time)
+    - Component has "No results found" (or something similar to it) block (it's displayed when the API request is successful, but the response is empty)
+    - Keyword highlight is implemented (highlight the keyword in the suggestion list items and in the input field value)
+    - Dropdown suggestion list is implemented (the list of suggestions is displayed when it has at least one item)
+    - The component is using the real-world API (not the "API" from the .json file or something like this)
+    - Click on an item in the suggestion list is implemented (when the user clicks on an item in the suggestion list, the input field value is changed to the value of the clicked item)
+    - Click outside of the input field is implemented (when the user clicks outside of the input field, the suggestion list is hidden)
+    - Error handling is implemented (the logic for API calling is wrapped in a try-catch block and the error is handled properly)
+    - Display a user-friendly error message (if the API request fails)
+    - Keyboard navigation is implemented (the user can navigate through the suggestion list with the arrow keys)
 
-    - The auto-complete component is controlled
-    - Component has loader
-    - Debounce is implemented
-    - Component has "No results found" (or something similar to it) block
-    - Keyword highlight is implemented
-    - Dropdown suggestion list is implemented
-    - The component is using the Real API
-    - Click on an item in the suggestion list is implemented
-    - Click outside of the input field is implemented
-    - Display a user-friendly error message 
-    - Error handling is implemented
-    - Keyboard navigation (with arrow keys) is implemented
-
-    I will send you the code of the files related to the hometask.
-    Please check this code carefully and compare with the list below. 
-    Your task will be to check - is the feature from the list implemented or not.
+    I will send you the code of the files related to this hometask.
+    Your first task is to carefully check the code of the related files and compare it with the list of the features above.
 
     Send me back the list of the features with ✅ or ❌ for every feature.
+    If you are not sure about the feature, please place 🤔 emoji and write a reason why you are not sure about the point.
 
     Your second task will be to calculate the final score of all the implemented features.
     Every feature has a certain amount of points.
@@ -94,21 +109,26 @@ export const sendRelatedFilesContentToAIAndAskToAnalyzeHometask = async (
     The code of the component is below:
     ${filesContent}
 
-    Your final answer should be in the following format:
+    Please also check the answers to the questions about React below:
+    ${questionsFileContent}
+
+    Your final answer should be ONLY in the following format, please do not add any other text (except ✅ and ❌):
 
     --- Features ---
     The auto-complete component is controlled
     Component has loader
     Debounce is implemented
-    Component has "No results found" (or something similar to it) block
+    Component has "No results found"
     Keyword highlight is implemented
     Dropdown suggestion list is implemented
-    The component is using the Real API
+    The component is using the real-world API
     Click on an item in the suggestion list is implemented
     Click outside of the input field is implemented
-    Display a user-friendly error message 
     Error handling is implemented
+    Display a user-friendly error message 
     Keyboard navigation (with arrow keys) is implemented
+
+    Right answers to the questions in % is: (please calculate the percentage of right answers to the questions about React and paste it here)
 
     --- Score ---
     Autocomplete is controlled - 100
@@ -125,6 +145,8 @@ export const sendRelatedFilesContentToAIAndAskToAnalyzeHometask = async (
 
     Please remember that the emoji should depends on the feature implementation.
     Please also mark every score feature with ✅ or ❌.
+
+    The maximum score can be 470. Don't sum this score with the right answers percentage!
     `;
 
   const completion = await openai.chat.completions.create({
@@ -132,5 +154,5 @@ export const sendRelatedFilesContentToAIAndAskToAnalyzeHometask = async (
     model: "gpt-4",
   });
 
-  console.log(completion.choices[0].message.content);
+  console.log("\n" + completion.choices[0].message.content);
 };
