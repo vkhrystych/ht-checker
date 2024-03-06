@@ -4,6 +4,10 @@ import ora from "ora";
 const app = express();
 const port = 666;
 
+const server = app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
 import {
   sendFilesStructureToAIAndAskReturnOnlyRelated,
   sendRelatedFilesContentToAIAndAskToAnalyzeHometask,
@@ -22,8 +26,5 @@ async function askAIToCheckHometask() {
   spinner.succeed("The process is finished");
 }
 
-askAIToCheckHometask();
-
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+await askAIToCheckHometask();
+server.close();

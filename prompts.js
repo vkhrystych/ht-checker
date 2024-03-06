@@ -87,7 +87,7 @@ export const sendRelatedFilesContentToAIAndAskToAnalyzeHometask = async (
     I will send you the code of the files related to this hometask.
     Your first task is to carefully check the code of the related files and compare it with the list of the features above.
 
-    Send me back the list of the features with ✅ or ❌ for every feature.
+    Send me back the list of the features with ✅ or ❌ for every feature. Emoji should be at start of the line and should be separated by space from the feature name!
     If you are not sure about the feature, please place 🤔 emoji and write a reason why you are not sure about the point.
 
     Your second task will be to calculate the final score of all the implemented features.
@@ -143,10 +143,8 @@ export const sendRelatedFilesContentToAIAndAskToAnalyzeHometask = async (
     Click outside of the input field hide suggestion list - 30
     Real world API - 10
 
-    Please remember that the emoji should depends on the feature implementation.
     Please also mark every score feature with ✅ or ❌.
-
-    The maximum score can be 470. Don't sum this score with the right answers percentage!
+    Please remember that the emoji should depends on the feature implementation.
     `;
 
   const completion = await openai.chat.completions.create({
